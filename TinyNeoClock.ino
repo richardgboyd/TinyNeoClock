@@ -40,6 +40,7 @@ public:
    uint8_t  cp_hour;
 
    ClockPositions ();
+   void readTime ();
    boolean update ();
 };
 
@@ -52,6 +53,14 @@ ClockPositions::ClockPositions()
    cp_hour = 0;
 }
 
+void ClockPositions::readTime()
+{     
+   DateTime myTime = RTC.now();
+   
+   cp_second = myTime.second();
+   cp_minute = myTime.minute();
+   cp_hour = myTime.hour();
+}
 
 boolean ClockPositions::update()
 {
@@ -60,13 +69,11 @@ boolean ClockPositions::update()
       
    if (millis() % 1000 != cp_milli)
    {   
-      DateTime myTime = RTC.now();
       
       cp_milli = millis() % 1000;
       
-      cp_second = myTime.second();
-      cp_minute = myTime.minute();
-      cp_hour = myTime.hour();
+      if ((cp_milli % 1000) == 0)
+         readTime();
       
       return true;
    }
@@ -224,6 +231,9 @@ void setup(void)
     TinyWireM.begin();
     RTC.begin();
     RTC_isRunning = RTC.isrunning();
+    if (RTC_isRunning) {
+      positions.readTime();
+    }
     strip.begin();
     strip.show();
 }
@@ -235,6 +245,7 @@ void loop(void)
        segments.draw();
    }
 }
+
 
 
 
